@@ -33,6 +33,7 @@ export default function RegisterScreen({navigation}) {
         'Erreur',
         error.response?.data?.message || 'Une erreur est survenue',
       );
+      console.log(error);
     }
   };
 

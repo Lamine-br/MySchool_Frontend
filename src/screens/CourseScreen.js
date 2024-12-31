@@ -1,29 +1,21 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, FlatList, StyleSheet, RefreshControl} from 'react-native';
+import {View, Text, FlatList, StyleSheet} from 'react-native';
 import axios from '../services/api';
 
 export default function CourseScreen() {
   const [courses, setCourses] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const fetchCourses = async () => {
-    try {
-      const response = await axios.get('/courses');
-      setCourses(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get('/courses');
+        setCourses(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     fetchCourses();
   }, []);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchCourses();
-    setRefreshing(false);
-  };
 
   const renderCourse = ({item}) => (
     <View style={styles.courseCard}>
@@ -39,9 +31,6 @@ export default function CourseScreen() {
         data={courses}
         renderItem={renderCourse}
         keyExtractor={item => item._id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
       />
     </View>
   );

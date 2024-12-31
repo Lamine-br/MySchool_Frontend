@@ -1,84 +1,72 @@
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import {View, StyleSheet} from 'react-native';
+import {TextInput, Button, Text, Snackbar} from 'react-native-paper';
+import instance from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const LoginScreen = ({navigation}) => {
+export default function LoginScreen({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    // Add login logic here
-    console.log('Login:', {email, password});
+  const handleLogin = async () => {
+    try {
+      const response = await instance.post('/auth/login', {email, password});
+      await AsyncStorage.setItem('token', response.data.token);
+      navigation.navigate('MainTabs');
+    } catch (err) {
+      setError('Erreur de connexion');
+      console.log(err);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-
+      <Text style={styles.title}>Connexion</Text>
       <TextInput
-        style={styles.input}
-        placeholder="Email"
+        label="Email"
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-
-      <TextInput
         style={styles.input}
-        placeholder="Password"
+        mode="outlined"
+      />
+      <TextInput
+        label="Mot de passe"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        style={styles.input}
+        mode="outlined"
       />
+      <Button mode="contained" onPress={handleLogin} style={styles.button}>
+        Se connecter
+      </Button>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+      {error ? (
+        <Snackbar visible={true} onDismiss={() => setError('')}>
+          {error}
+        </Snackbar>
+      ) : null}
 
-      <Text
-        style={{marginTop: 15}}
-        onPress={() => navigation.navigate('Register')}>
-        Don't have an account? Register
-      </Text>
+      <View style={styles.registerContainer}>
+        <Text>Vous n'avez pas de compte ?</Text>
+        <Button mode="text" onPress={() => navigation.navigate('Register')}>
+          Créez un compte
+        </Button>
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
+  container: {flex: 1, padding: 20, justifyContent: 'center'},
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
-  input: {
-    width: '100%',
-    padding: 15,
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  button: {
-    backgroundColor: '#28A745',
-    padding: 15,
-    borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 16,
-  },
+  input: {marginBottom: 15},
+  button: {marginTop: 10},
+  registerContainer: {marginTop: 20, alignItems: 'center'},
 });
-
-export default LoginScreen;
